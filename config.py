@@ -13,16 +13,16 @@ def _env_bool(key: str, default: bool = False) -> bool:
 class Config:
     def __init__(self):
         # Core
-        self.API_ID = int(getenv("API_ID", "39772794"))
-        self.API_HASH = getenv("API_HASH", "2ee2ed0c08035c3264f864e5e12f37c7")
-        self.BOT_TOKEN = getenv("BOT_TOKEN", "8227251406:AAHzB02VRGFiV2VzXP51R5l95PozgxUbMqQ")
+        self.API_ID = int(getenv("API_ID", "30527441"))
+        self.API_HASH = getenv("API_HASH", "5d5328f4556130c7f5c6055d7a703bc2")
+        self.BOT_TOKEN = getenv("BOT_TOKEN", "8441056561:AAFhSeSQ49OoXZiuipYD-J94xjgjISd4KS0")
         self.MONGO_URL = getenv("MONGO_URL", "mongodb+srv://mongoguess:guessmongo@cluster0.zcwklzz.mongodb.net/?retryWrites=true&w=majority") or getenv("MONGO_DB_URI")
-        self.LOGGER_ID = int(getenv("LOGGER_ID", "-1003682183380"))
-        self.OWNER_ID = int(getenv("OWNER_ID", "7932897819"))
-        self.OWNER_USERNAME = getenv("OWNER_USERNAME", "@Qu1iyef")
-        self.BOT_USERNAME = getenv("BOT_USERNAME", "@SessizMelodimuzik_bot")
-        self.BOT_NAME = getenv("BOT_NAME", "SessizMelodi")
-        self.ASSUSERNAME = getenv("ASSUSERNAME", "SessizMelodi Asistant")
+        self.LOGGER_ID = int(getenv("LOGGER_ID", "-1003695016820"))
+        self.OWNER_ID = int(getenv("OWNER_ID", "6143754072"))
+        self.OWNER_USERNAME = getenv("OWNER_USERNAME", "@Ekimekadar")
+        self.BOT_USERNAME = getenv("BOT_USERNAME", "@AppleSongMusic_Bot")
+        self.BOT_NAME = getenv("BOT_NAME", "Apple Musıc")
+        self.ASSUSERNAME = getenv("ASSUSERNAME", "@Appppllw")
 
         # Limits
         self.DURATION_LIMIT_MIN = int(getenv("DURATION_LIMIT", 60))
@@ -43,7 +43,7 @@ class Config:
         )
 
         # Sessions
-        self.SESSION1 = getenv("SESSION1", "AQJe4noAgi-ZXz-72BT1l4sx9wEsXeaABJu_yA1z8YA9J5KzTuAffQ3a39bHiZot2n56Ud00qoTH4RK41ZdU_XG1qaCj7wdQTBgxlZW-liwAxD0LjPk7Gl2z9Jokj0VUueNd2Nq2Ws4Go49w-m6NdLlltcAlivkinfXkci7pIF0CiDab_1n4kn-5V6EobrlsToB6ywPIFleZuR_JwS4VCrVSsiwWhOe9bL1oBGjAOm4fjim8sIiTkdL60a3a6ZuljMx0uWhTms3fTxowXu55YeT7tz1ANU9UF0HakrHybjZvqGxpu5sIXIcwWxYczsRUfW7ZlZZKqXX3S0f3mQ6d2Dd-MJf8bAAAAAHacLhZAA")
+        self.SESSION1 = getenv("SESSION1", "BQHRz9EAj3dJx-4g7GhrQ0fgGaFLo2c4w_346Gf-_PCDRI_cPEEso-73IEu8pOesqu4yHSpi5sXT1T5BY96hCLlFWi_0n57Vhb5F36cbwn5y5EwJS-f_wOurhF1mxpTMiC4yNp7M1AqMbqNBeeqafX7LDUQN7cJVPIzwKTpp2pwcX6FaxMhgnEG4-TgjusvKdM0fRJWxFRbvtcsD5GUNCW9OU3OwyS12_ENCtGV5F6zLupnK6xIsifVGdKKhuCqF5MpYdw5Tcytkoph-KXf0uPsiUXdIhX2x4htR7ubWUnMeXRJyO04FHVtMt1D9JM7p3BVZPQTK5gHOayqI4Vtg2t4xh65BswAAAAG3WPv4AA")
         if not self.SESSION1:
             self.SESSION1 = getenv("SESSION")
         if not self.SESSION1:
@@ -56,8 +56,8 @@ class Config:
         self.STRING5 = getenv("STRING_SESSION5")
 
         # Support
-        self.SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/dolubirkafa")
-        self.SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/SessizMelodim")
+        self.SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/tr_telegrammarket")
+        self.SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/goygoy_chat")
 
         # Playback / behavior
         self.AUTO_END = _env_bool("AUTO_END", False)
@@ -65,7 +65,7 @@ class Config:
         self.VIDEO_PLAY = _env_bool("VIDEO_PLAY", True)
         cookie_env = getenv("COOKIES_URL", "https://batbin.me/grandmothers")
         if not cookie_env:
-            cookie_env = getenv("COOKIE_URL", "https://batbin.me/grandmothers")
+            cookie_env = getenv("COOKIE_URL", "https://batbin.me/antiphthisical")
         self.COOKIES_URL = [
             url for url in cookie_env.split(" ")
             if url and "batbin.me" in url
@@ -116,9 +116,9 @@ class Config:
 
         # Start media
         self.START_VIDS = [
-            "https://telegra.ph/file/9b7e1b820c72a14d90be7.mp4",
-            "https://telegra.ph/file/72f349b1386d6d9374a38.mp4",
-            "https://telegra.ph/file/a4d90b0cb759b67d68644.mp4",
+            "https://files.catbox.moe/a2p7ry.mp4",
+            "https://files.catbox.moe/588eop.mp4",
+            "https://files.catbox.moe/4rflnn.mp4",
         ]
         self.STICKERS = [
             "CAACAgUAAx0Cld6nKUAACASBI_rna1O1e6g7qS-ry-aZ1ZpVEnwACgg8AAi2LEfFI5wfykOC4h4E",
