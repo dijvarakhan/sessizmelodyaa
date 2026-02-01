@@ -15,7 +15,7 @@ class Config:
         # Core
         self.API_ID = int(getenv("API_ID", "30527441"))
         self.API_HASH = getenv("API_HASH", "5d5328f4556130c7f5c6055d7a703bc2")
-        self.BOT_TOKEN = getenv("BOT_TOKEN", "8441056561:AAFhSeSQ49OoXZiuipYD-J94xjgjISd4KS0")
+        self.BOT_TOKEN = getenv("BOT_TOKEN", "8284340154:AAH07G9K1e6Lb3LbmTYm9kZj51KlYqVwses")
         self.MONGO_URL = getenv("MONGO_URL", "mongodb+srv://mongoguess:guessmongo@cluster0.zcwklzz.mongodb.net/?retryWrites=true&w=majority") or getenv("MONGO_DB_URI")
         self.LOGGER_ID = int(getenv("LOGGER_ID", "-1003695016820"))
         self.OWNER_ID = int(getenv("OWNER_ID", "6143754072"))
