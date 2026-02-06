@@ -18,7 +18,7 @@ class Config:
         self.BOT_TOKEN = getenv("BOT_TOKEN", "8284340154:AAH07G9K1e6Lb3LbmTYm9kZj51KlYqVwses")
         self.MONGO_URL = getenv("MONGO_URL", "mongodb+srv://mongoguess:guessmongo@cluster0.zcwklzz.mongodb.net/?retryWrites=true&w=majority") or getenv("MONGO_DB_URI")
         self.LOGGER_ID = int(getenv("LOGGER_ID", "-1003695016820"))
-        self.OWNER_ID = int(getenv("OWNER_ID", "7912748585"))
+        self.OWNER_ID = int(getenv("OWNER_ID", "8003955025"))
         self.OWNER_USERNAME = getenv("OWNER_USERNAME", "@Ekimekadar")
         self.BOT_USERNAME = getenv("BOT_USERNAME", "@AppleSongMusic_Bot")
         self.BOT_NAME = getenv("BOT_NAME", "Apple Musıc")
