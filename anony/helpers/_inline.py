@@ -157,21 +157,21 @@ class Inline:
             rows = [
                 [
                     self.ikb(
-                        text=lang.get("S_B_1", lang["add_me"]),
+                        text="➕ Gruba Ekle",
                         url=f"https://t.me/{app.username}?startgroup=true",
                     )
                 ],
                 [
                     self.ikb(
-                        text=lang.get("S_B_7", lang.get("source", "Owner")),
+                        text="Geliştirici",
                         user_id=config.OWNER_ID,
                     ),
                     self.ikb(
-                        text=lang.get("S_B_4", lang["support"]),
+                        text="Destek",
                         url=config.SUPPORT_CHAT,
                     ),
                 ],
-                [self.ikb(text=lang.get("S_B_3", lang["help"]), callback_data="help")],
+                [self.ikb(text="Yardım & Komutlar", callback_data="help")],
             ]
             return self.ikm(rows)
         rows = [
@@ -197,4 +197,5 @@ class Inline:
                 ],
             ]
         )
+
 
