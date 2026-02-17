@@ -105,6 +105,103 @@ async def top_users(_, message: types.Message):
             elif total_messages > 100:
                 text += "\n😊 **İdare eder!** Biraz daha aktiflik gerekir."
 
+@app.on_message(filters.command(["grupistatistik", "groupstats"]) & filters.group & ~app.bl_users)
+@lang.language()
+async def group_stats(_, message: types.Message):
+    chat_id = message.chat.id
+    today = datetime.date.today()
+    
+    # Get daily stats
+    today_str = str(today)
+    daily_count = await db.daily_messages.count_documents({"chat_id": chat_id, "date": today_str})
+    daily_total = await db.daily_messages.aggregate([
+        {"$match": {"chat_id": chat_id, "date": today_str}},
+        {"$group": {"_id": None, "total": {"$sum": "$count"}}}
+    ]).to_list(1)
+    daily_total = daily_total[0]["total"] if daily_total else 0
+    
+    # Get weekly stats
+    start_of_week = today - datetime.timedelta(days=today.weekday())
+    weekly_count = await db.weekly_messages.count_documents({"chat_id": chat_id, "week": str(start_of_week)})
+    weekly_total = await db.weekly_messages.aggregate([
+        {"$match": {"chat_id": chat_id, "week": str(start_of_week)}},
+        {"$group": {"_id": None, "total": {"$sum": "$count"}}}
+    ]).to_list(1)
+    weekly_total = weekly_total[0]["total"] if weekly_total else 0
+    
+    # Get monthly stats
+    start_of_month = today.replace(day=1)
+    monthly_count = await db.monthly_messages.count_documents({"chat_id": chat_id, "month": str(start_of_month)})
+    monthly_total = await db.monthly_messages.aggregate([
+        {"$match": {"chat_id": chat_id, "month": str(start_of_month)}},
+        {"$group": {"_id": None, "total": {"$sum": "$count"}}}
+    ]).to_list(1)
+    monthly_total = monthly_total[0]["total"] if monthly_total else 0
+    
+    # Get most active users for each period
+    daily_top = await db.daily_messages.find({"chat_id": chat_id, "date": today_str}).sort("count", -1).limit(3).to_list(3)
+    weekly_top = await db.weekly_messages.find({"chat_id": chat_id, "week": str(start_of_week)}).sort("count", -1).limit(3).to_list(3)
+    monthly_top = await db.monthly_messages.find({"chat_id": chat_id, "month": str(start_of_month)}).sort("count", -1).limit(3).to_list(3)
+    
+    text = f"**📈 {message.chat.title} Grup İstatistikleri**\n\n"
+    
+    # Daily section
+    text += f"**📅 Günlük (Bugün)**\n"
+    text += f"├ Aktif Kullanıcı: {daily_count}\n"
+    text += f"├ Toplam Mesaj: {daily_total}\n"
+    if daily_top:
+        text += "└ En İyi 3:\n"
+        for i, user_data in enumerate(daily_top, 1):
+            try:
+                user = await app.get_users(user_data["user_id"])
+                username = user.mention
+            except:
+                username = "Bilinmeyen"
+            text += f"   {get_rank_badge(i)} {username}: `{user_data['count']}`\n"
+    
+    # Weekly section
+    text += f"\n**📆 Haftalık (Bu Hafta)**\n"
+    text += f"├ Aktif Kullanıcı: {weekly_count}\n"
+    text += f"├ Toplam Mesaj: {weekly_total}\n"
+    if weekly_top:
+        text += "└ En İyi 3:\n"
+        for i, user_data in enumerate(weekly_top, 1):
+            try:
+                user = await app.get_users(user_data["user_id"])
+                username = user.mention
+            except:
+                username = "Bilinmeyen"
+            text += f"   {get_rank_badge(i)} {username}: `{user_data['count']}`\n"
+    
+    # Monthly section
+    text += f"\n**🗓️ Aylık (Bu Ay)**\n"
+    text += f"├ Aktif Kullanıcı: {monthly_count}\n"
+    text += f"├ Toplam Mesaj: {monthly_total}\n"
+    if monthly_top:
+        text += "└ En İyi 3:\n"
+        for i, user_data in enumerate(monthly_top, 1):
+            try:
+                user = await app.get_users(user_data["user_id"])
+                username = user.mention
+            except:
+                username = "Bilinmeyen"
+            text += f"   {get_rank_badge(i)} {username}: `{user_data['count']}`\n"
+    
+    # Overall activity level
+    total_activity = daily_total + weekly_total + monthly_total
+    if total_activity > 5000:
+        activity_level = "🔥 Çok Yüksek"
+    elif total_activity > 2000:
+        activity_level = "⚡ Yüksek"
+    elif total_activity > 1000:
+        activity_level = "✨ Orta"
+    elif total_activity > 500:
+        activity_level = "💫 Düşük"
+    else:
+        activity_level = "💤 Çok Düşük"
+    
+    text += f"\n**🏆 Genel Aktivite Seviyesi: {activity_level}**"
+    
     await message.reply_text(text)
 
 @app.on_message(filters.command(["mystats", "benimskor"]) & filters.group & ~app.bl_users)
@@ -249,4 +346,5 @@ def get_activity_emoji(count):
         return "⭐"
     else:
         return "💤"
+
 
