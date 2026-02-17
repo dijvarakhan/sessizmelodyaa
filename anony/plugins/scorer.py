@@ -134,7 +134,10 @@ async def get_leaderboard_text(chat_id: int, period: str) -> str:
         activity_emoji = get_activity_emoji(count)
         user_list.append(f"{badge} **{i + 1}.** {username}: `{count}` {activity_emoji}")
     
-    text += "\n".join(user_list)
+    if not user_list:
+        text += "😴 Henüz kimse mesaj göndermedi."
+    else:
+        text += "\n".join(user_list)
         text += f"\n\n📈 **Toplam:** {total_messages} mesaj, {total_users} kullanıcı"
         if total_messages > 0 and total_users > 0:
             avg_messages = total_messages // total_users
