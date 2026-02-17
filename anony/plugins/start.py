@@ -35,16 +35,18 @@ async def start(_, message: types.Message):
     if private or message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         _lang = lang.languages.get("tr", message.lang)
     if private:
-        uptime = utils.format_eta(int(time.time() - boot))
-        users_count = len(await db.get_users())
-        chats_count = len(await db.get_chats())
-        _text = _lang.get("start_pm_stats", _lang["start_pm"]).format(
-            message.from_user.first_name,
-            app.name,
-            uptime,
-            users_count,
-            chats_count,
-        )
+        _text = f"""Merhaba, {message.from_user.first_name}
+Ben {app.name} 🎧
+
+✨ Neler yapabilirim?
+- 🎵 Grup çağrılarında müzik çalarım
+- 🎬 Video oynatırım
+- 🌍 Çoklu dil desteği sunarım
+- Yönetim komutlarını kullanırım
+- 👋 Özel hoşgeldin mesajları
+
+🚀 Komutlar için aşağıdaki menüyü kullan
+💬 Destek: Sertifikalı Kodlayıcı"""
     else:
         _text = _lang["start_gp"].format(app.name)
 
@@ -112,3 +114,4 @@ async def _new_member(_, message: types.Message):
                 return
             await utils.send_log(message, True)
             await db.add_chat(message.chat.id)
+
