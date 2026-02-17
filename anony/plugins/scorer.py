@@ -4,7 +4,7 @@ from pyrogram import filters, types
 from anony import app, db, lang, tasks
 
 
-@app.on_message(filters.group & ~app.bl_users)
+@app.on_message(filters.group & ~app.bl_users, group=1)
 async def count_message(_, message: types.Message):
     if not message.from_user:
         return
@@ -91,28 +91,50 @@ async def get_leaderboard_text(chat_id: int, period: str) -> str:
     else:
         return "Geçersiz süre."
 
+    # Cursor'ı listeye çevir (maksimum 15 kayıt)
+    results_list = []
+    async for result in results:
+        results_list.append(result)
+
     text = f"**📊 {period_str} Mesaj Sıralaması - İlk 15**\n\n"
+    
+    if not results_list:
+        text += "😴 Henüz kimse mesaj göndermedi."
+        return text
+
     total_messages = 0
     total_users = 0
     user_list = []
-    async for result in results:
+    
+    # Kullanıcı bilgilerini toplu çek (Hata toleranslı)
+    user_ids = [r.get("user_id") for r in results_list]
+    users_dict = {}
+    
+    # Tek tek get_users çağrılarını asenkron olarak topla
+    user_tasks = [app.get_users(uid) for uid in user_ids]
+    user_results = await asyncio.gather(*user_tasks, return_exceptions=True)
+    
+    for uid, res in zip(user_ids, user_results):
+        if not isinstance(res, Exception):
+            users_dict[uid] = res
+
+    for i, result in enumerate(results_list):
         user_id = result.get("user_id")
         count = int(result.get("count", 0))
         total_messages += count
         total_users += 1
-        try:
-            user = await app.get_users(user_id)
+        
+        user = users_dict.get(user_id)
+        if user:
             username = user.mention
-        except Exception:
+        else:
             username = "Bilinmeyen Kullanıcı"
-        badge = get_rank_badge(total_users)
+            
+        badge = get_rank_badge(i + 1)
         activity_emoji = get_activity_emoji(count)
-        user_list.append(f"{badge} **{total_users}.** {username}: `{count}` {activity_emoji}")
+        user_list.append(f"{badge} **{i + 1}.** {username}: `{count}` {activity_emoji}")
     
-    if not user_list:
-        text += "😴 Henüz kimse mesaj göndermedi."
-    else:
-        text += "\n".join(user_list)
+    text += "\n".join(user_list)
         text += f"\n\n📈 **Toplam:** {total_messages} mesaj, {total_users} kullanıcı"
         if total_messages > 0 and total_users > 0:
             avg_messages = total_messages // total_users
@@ -127,7 +149,6 @@ async def get_leaderboard_text(chat_id: int, period: str) -> str:
 
 
 @app.on_message(filters.command(["top", "skor"]) & filters.group & ~app.bl_users)
-@lang.language()
 async def top_users(_, message: types.Message):
     cmd = message.command
     if len(cmd) > 1:
@@ -510,4 +531,5 @@ async def scheduled_cleanup():
 
 
 tasks.append(asyncio.create_task(scheduled_cleanup()))
+
 
