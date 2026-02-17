@@ -50,6 +50,7 @@ class MongoDB:
         self.daily_messages = self.db.daily_messages
         self.weekly_messages = self.db.weekly_messages
         self.monthly_messages = self.db.monthly_messages
+        self.all_time_messages = self.db.all_time_messages
 
     async def connect(self) -> None:
         """Check if we can connect to the database.
