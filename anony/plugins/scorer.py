@@ -65,7 +65,7 @@ async def top_users(_, message: types.Message):
         results = db.monthly_messages.find({"chat_id": chat_id, "month": str(start_of_month)}).sort("count", -1).limit(15)
         period_str = "Aylık"
 
-    text = f"**Grubunuzda {period_str} en çok aktif olan 15 kişi:**\n\n"
+    text = f"**📊 {period_str} Mesaj Sıralaması - İlk 15**\n\n"
     total_messages = 0
     total_users = 0
     
@@ -75,18 +75,35 @@ async def top_users(_, message: types.Message):
         count = result["count"]
         total_messages += count
         total_users += 1
+        
         try:
             user = await app.get_users(user_id)
-            user_list.append(f"**{total_users}.** {user.mention}: {count}")
+            username = user.mention
         except:
-            user_list.append(f"**{total_users}.** Bilinmeyen Kullanıcı: {count}")
+            username = "Bilinmeyen Kullanıcı"
+        
+        badge = get_rank_badge(total_users)
+        activity_emoji = get_activity_emoji(count)
+        
+        user_list.append(f"{badge} **{total_users}.** {username}: `{count}` {activity_emoji}")
 
     if not user_list:
-        text += "Henüz kimse mesaj göndermedi."
+        text += "😴 Henüz kimse mesaj göndermedi."
     else:
         text += "\n".join(user_list)
-        text += f"\n\nToplam mesaj: {total_messages}"
-        text += f"\nToplam kullanıcı: {total_users}"
+        text += f"\n\n📈 **Toplam:** {total_messages} mesaj, {total_users} kullanıcı"
+        
+        # Add some fun statistics
+        if total_messages > 0:
+            avg_messages = total_messages // total_users
+            text += f"\n📊 **Ortalama:** {avg_messages} mesaj/kullanıcı"
+            
+            if total_messages > 1000:
+                text += "\n🎉 **Harika!** Bu grup çok aktif!"
+            elif total_messages > 500:
+                text += "\n👍 **Güzel!** Grup aktif durumda!"
+            elif total_messages > 100:
+                text += "\n😊 **İdare eder!** Biraz daha aktiflik gerekir."
 
     await message.reply_text(text)
 
@@ -206,4 +223,30 @@ def start_cleanup():
 
 # Start cleanup in background
 threading.Thread(target=start_cleanup, daemon=True).start()
+
+def get_rank_badge(rank):
+    """Get emoji badge for rank"""
+    badges = {
+        1: "🥇",
+        2: "🥈", 
+        3: "🥉",
+        4: "🏅",
+        5: "🏅"
+    }
+    return badges.get(rank, "👤")
+
+def get_activity_emoji(count):
+    """Get activity level emoji"""
+    if count > 1000:
+        return "🔥"
+    elif count > 500:
+        return "⚡"
+    elif count > 100:
+        return "✨"
+    elif count > 50:
+        return "💫"
+    elif count > 10:
+        return "⭐"
+    else:
+        return "💤"
 
