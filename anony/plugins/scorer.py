@@ -204,6 +204,41 @@ async def group_stats(_, message: types.Message):
     
     await message.reply_text(text)
 
+@app.on_message(filters.command(["skoryardım", "scorehelp"]) & filters.group & ~app.bl_users)
+@lang.language()
+async def score_help(_, message: types.Message):
+    text = """**📊 Mesaj Skor Sistemi Yardım**\n\n"""
+    text += "**Komutlar:**\n"
+    text += "├ `/top` - Günlük sıralama\n"
+    text += "├ `/top weekly` - Haftalık sıralama\n"
+    text += "├ `/top monthly` - Aylık sıralama\n"
+    text += "├ `/mystats` - Kişisel istatistiklerin\n"
+    text += "├ `/grupistatistik` - Grup istatistikleri\n"
+    text += "└ `/skoryardım` - Bu yardım mesajı\n\n"
+    
+    text += "**Sıralama Rozetleri:**\n"
+    text += "🥇 **1.** - Altın madalya\n"
+    text += "🥈 **2.** - Gümüş madalya\n"
+    text += "🥉 **3.** - Bronz madalya\n"
+    text += "🏅 **4-5.** - Başarı rozeti\n"
+    text += "👤 **6+** - Katılım rozeti\n\n"
+    
+    text += "**Aktivite Emojileri:**\n"
+    text += "🔥 1000+ mesaj - Aşırı aktif\n"
+    text += "⚡ 500+ mesaj - Çok aktif\n"
+    text += "✨ 100+ mesaj - Aktif\n"
+    text += "💫 50+ mesaj - Orta\n"
+    text += "⭐ 10+ mesaj - Az aktif\n"
+    text += "💤 10 mesaj - Düşük aktivite\n\n"
+    
+    text += "**💡 İpuçları:**\n"
+    text += "• Her mesajınız puan kazandırır\n"
+    text += "• Günlük, haftalık ve aylık sıralamalar ayrıdır\n"
+    text += "• Eski veriler otomatik olarak temizlenir\n"
+    text += "• Aktiflik seviyenizi görmek için `/mystats` kullanın"
+    
+    await message.reply_text(text)
+
 @app.on_message(filters.command(["mystats", "benimskor"]) & filters.group & ~app.bl_users)
 @lang.language()
 async def my_stats(_, message: types.Message):
