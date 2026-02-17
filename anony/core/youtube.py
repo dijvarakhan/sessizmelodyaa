@@ -125,8 +125,8 @@ class YouTube:
 
         if video:
             formats = [
-                "(bestvideo[height<=?720][width<=?1280][ext=mp4])+(bestaudio[ext=m4a])",
-                "bestvideo[height<=?720]+bestaudio/best[height<=?720]",
+                "(bestvideo[height<=?2160][width<=?3840][ext=mp4])+(bestaudio[ext=m4a])",
+                "bestvideo[height<=?2160]+bestaudio/best[height<=?2160]",
             ]
             ydl_opts_list = [
                 {**base_opts, "format": f, "merge_output_format": "mp4"}
