@@ -62,7 +62,7 @@ class TgCall(PyTgCalls):
             types.AudioQuality, config.AUDIO_QUALITY, types.AudioQuality.HIGH
         )
         video_quality = getattr(
-            types.VideoQuality, config.VIDEO_QUALITY, types.VideoQuality.HD_720p
+            types.VideoQuality, config.VIDEO_QUALITY, types.VideoQuality.UHD_4K
         )
         extra_ffmpeg = ""
         if isinstance(media.file_path, str) and media.file_path.startswith(("http://", "https://")):
