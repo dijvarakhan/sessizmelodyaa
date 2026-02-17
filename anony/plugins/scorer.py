@@ -152,6 +152,7 @@ async def get_leaderboard_text(chat_id: int, period: str) -> str:
 
 
 @app.on_message(filters.command(["top", "skor"]) & filters.group & ~app.bl_users)
+@lang.language()
 async def top_users(_, message: types.Message):
     cmd = message.command
     if len(cmd) > 1:
