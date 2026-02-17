@@ -90,3 +90,84 @@ async def top_users(_, message: types.Message):
 
     await message.reply_text(text)
 
+@app.on_message(filters.command(["mystats", "benimskor"]) & filters.group & ~app.bl_users)
+@lang.language()
+async def my_stats(_, message: types.Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    today = datetime.date.today()
+    
+    # Get daily stats
+    today_str = str(today)
+    daily_result = await db.daily_messages.find_one({"user_id": user_id, "chat_id": chat_id, "date": today_str})
+    daily_count = daily_result["count"] if daily_result else 0
+    
+    # Get weekly stats
+    start_of_week = today - datetime.timedelta(days=today.weekday())
+    weekly_result = await db.weekly_messages.find_one({"user_id": user_id, "chat_id": chat_id, "week": str(start_of_week)})
+    weekly_count = weekly_result["count"] if weekly_result else 0
+    
+    # Get monthly stats
+    start_of_month = today.replace(day=1)
+    monthly_result = await db.monthly_messages.find_one({"user_id": user_id, "chat_id": chat_id, "month": str(start_of_month)})
+    monthly_count = monthly_result["count"] if monthly_result else 0
+    
+    # Get rankings
+    daily_rank = await get_user_rank(chat_id, "daily", user_id, today_str)
+    weekly_rank = await get_user_rank(chat_id, "weekly", user_id, str(start_of_week))
+    monthly_rank = await get_user_rank(chat_id, "monthly", user_id, str(start_of_month))
+    
+    user = message.from_user
+    text = f"**{user.mention} - Mesaj İstatistikleri**\n\n"
+    text += f"📅 **Günlük:** {daily_count} mesaj"
+    if daily_rank > 0:
+        text += f" (Sıralama: #{daily_rank})"
+    text += f"\n📆 **Haftalık:** {weekly_count} mesaj"
+    if weekly_rank > 0:
+        text += f" (Sıralama: #{weekly_rank})"
+    text += f"\n🗓️ **Aylık:** {monthly_count} mesaj"
+    if monthly_rank > 0:
+        text += f" (Sıralama: #{monthly_rank})"
+    
+    # Calculate activity level
+    total_messages = daily_count + weekly_count + monthly_count
+    if total_messages > 1000:
+        level = "🔥 Çok Aktif"
+    elif total_messages > 500:
+        level = "⚡ Aktif"
+    elif total_messages > 100:
+        level = "✨ Orta"
+    else:
+        level = "💤 Az Aktif"
+    
+    text += f"\n\n🏆 **Aktivite Seviyesi:** {level}"
+    
+    await message.reply_text(text)
+
+async def get_user_rank(chat_id, period, user_id, period_str):
+    if period == "daily":
+        pipeline = [
+            {"$match": {"chat_id": chat_id, "date": period_str}},
+            {"$sort": {"count": -1}},
+            {"$group": {"_id": None, "users": {"$push": "$user_id"}}}
+        ]
+        result = await db.daily_messages.aggregate(pipeline).to_list(1)
+    elif period == "weekly":
+        pipeline = [
+            {"$match": {"chat_id": chat_id, "week": period_str}},
+            {"$sort": {"count": -1}},
+            {"$group": {"_id": None, "users": {"$push": "$user_id"}}}
+        ]
+        result = await db.weekly_messages.aggregate(pipeline).to_list(1)
+    else: # monthly
+        pipeline = [
+            {"$match": {"chat_id": chat_id, "month": period_str}},
+            {"$sort": {"count": -1}},
+            {"$group": {"_id": None, "users": {"$push": "$user_id"}}}
+        ]
+        result = await db.monthly_messages.aggregate(pipeline).to_list(1)
+    
+    if result and user_id in result[0]["users"]:
+        return result[0]["users"].index(user_id) + 1
+    return 0
+
