@@ -171,3 +171,39 @@ async def get_user_rank(chat_id, period, user_id, period_str):
         return result[0]["users"].index(user_id) + 1
     return 0
 
+async def cleanup_old_data():
+    """Remove old message data to keep database clean"""
+    today = datetime.date.today()
+    
+    # Clean daily data older than 7 days
+    seven_days_ago = today - datetime.timedelta(days=7)
+    await db.daily_messages.delete_many({"date": {"$lt": str(seven_days_ago)}})
+    
+    # Clean weekly data older than 4 weeks
+    four_weeks_ago = today - datetime.timedelta(weeks=4)
+    await db.weekly_messages.delete_many({"week": {"$lt": str(four_weeks_ago)}})
+    
+    # Clean monthly data older than 3 months
+    three_months_ago = today - datetime.timedelta(days=90)
+    await db.monthly_messages.delete_many({"month": {"$lt": str(three_months_ago)}})
+
+# Schedule cleanup task
+import asyncio
+async def scheduled_cleanup():
+    while True:
+        await asyncio.sleep(3600)  # Run every hour
+        try:
+            await cleanup_old_data()
+        except Exception as e:
+            print(f"Cleanup error: {e}")
+
+# Start cleanup task
+import threading
+def start_cleanup():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(scheduled_cleanup())
+
+# Start cleanup in background
+threading.Thread(target=start_cleanup, daemon=True).start()
+
