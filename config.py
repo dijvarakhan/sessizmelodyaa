@@ -19,6 +19,10 @@ class Config:
         self.MONGO_URL = getenv("MONGO_URL", "mongodb+srv://mongoguess:guessmongo@cluster0.zcwklzz.mongodb.net/?retryWrites=true&w=majority") or getenv("MONGO_DB_URI")
         self.LOGGER_ID = int(getenv("LOGGER_ID", "-1003695016820"))
         self.OWNER_ID = int(getenv("OWNER_ID", "8548853828"))
+        
+        # Sudo Users
+        self.SUDO_USERS = {int(x) for x in getenv("SUDO_USERS", "").split()}
+
         self.OWNER_USERNAME = getenv("OWNER_USERNAME", "@Ekimekadar")
         self.BOT_USERNAME = getenv("BOT_USERNAME", "@AppleSongMusic_Bot")
         self.BOT_NAME = getenv("BOT_NAME", "Apple Musıc")
