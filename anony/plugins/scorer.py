@@ -35,77 +35,52 @@ async def count_message(_, message: types.Message):
     )
 
 
-def get_rank_badge(rank: int) -> str:
-    badges = {1: "🥇", 2: "🥈", 3: "🥉", 4: "🏅", 5: "🏅"}
-    return badges.get(rank, "👤")
+async def get_leaderboard_text(chat_id: int, period: str, requester_id: int = None, requester_name: str = None) -> str:
+    period_str = ""
+    period_header = ""
+    query_filter = {}
+    collection = None
 
-
-def get_activity_emoji(count: int) -> str:
-    if count > 1000:
-        return "🔥"
-    if count > 500:
-        return "⚡"
-    if count > 100:
-        return "✨"
-    if count > 50:
-        return "💫"
-    if count > 10:
-        return "⭐"
-    return "💤"
-
-
-async def get_leaderboard_text(chat_id: int, period: str) -> str:
+    today = datetime.date.today()
     if period == "daily":
-        today = datetime.date.today()
-        results = (
-            db.daily_messages.find({"chat_id": chat_id, "date": str(today)})
-            .sort("count", -1)
-            .limit(15)
-        )
+        query_filter = {"chat_id": chat_id, "date": str(today)}
+        collection = db.daily_messages
         period_str = "Günlük"
+        period_header = "Bugün"
     elif period == "weekly":
-        today = datetime.date.today()
         start_of_week = today - datetime.timedelta(days=today.weekday())
-        results = (
-            db.weekly_messages.find({"chat_id": chat_id, "week": str(start_of_week)})
-            .sort("count", -1)
-            .limit(15)
-        )
+        query_filter = {"chat_id": chat_id, "week": str(start_of_week)}
+        collection = db.weekly_messages
         period_str = "Haftalık"
+        period_header = "bu HAFTA"
     elif period == "monthly":
-        today = datetime.date.today()
         start_of_month = today.replace(day=1)
-        results = (
-            db.monthly_messages.find({"chat_id": chat_id, "month": str(start_of_month)})
-            .sort("count", -1)
-            .limit(15)
-        )
+        query_filter = {"chat_id": chat_id, "month": str(start_of_month)}
+        collection = db.monthly_messages
         period_str = "Aylık"
+        period_header = "bu AY"
     elif period == "alltime":
-        results = (
-            db.all_time_messages.find({"chat_id": chat_id})
-            .sort("count", -1)
-            .limit(15)
-        )
+        query_filter = {"chat_id": chat_id}
+        collection = db.all_time_messages
         period_str = "Tüm Zamanlar"
+        period_header = "TÜM ZAMANLARDA"
     else:
         return "Geçersiz süre."
 
-    # Cursor'ı listeye çevir (maksimum 15 kayıt)
+    results = collection.find(query_filter).sort("count", -1).limit(20)
+    
+    # Cursor'ı listeye çevir
     results_list = []
     async for result in results:
         results_list.append(result)
 
-    text = f"**📊 {period_str} Mesaj Sıralaması - İlk 15**\n\n"
+    text = f"� Grubunuzdaki **{period_header}** en çok aktif olanlar:\n\n"
+    text += "Kullanıcı → Mesaj\n"
     
     if not results_list:
         text += "😴 Henüz kimse mesaj göndermedi."
         return text
 
-    total_messages = 0
-    total_users = 0
-    user_list = []
-    
     # Kullanıcı bilgilerini toplu çek (Hata toleranslı)
     user_ids = [r.get("user_id") for r in results_list]
     users_dict = {}
@@ -118,78 +93,54 @@ async def get_leaderboard_text(chat_id: int, period: str) -> str:
         if not isinstance(res, Exception):
             users_dict[uid] = res
 
+    user_list = []
+    requester_count = 0
+    
     for i, result in enumerate(results_list):
         user_id = result.get("user_id")
         count = int(result.get("count", 0))
-        total_messages += count
-        total_users += 1
+        
+        if requester_id and user_id == requester_id:
+            requester_count = count
         
         user = users_dict.get(user_id)
         if user:
-            username = user.mention
+            username = user.first_name
         else:
-            username = "Bilinmeyen Kullanıcı"
+            username = "Bilinmeyen"
             
-        badge = get_rank_badge(i + 1)
-        activity_emoji = get_activity_emoji(count)
-        user_list.append(f"{badge} **{i + 1}.** {username}: `{count}` {activity_emoji}")
+        user_list.append(f"⬜ {i + 1}. {username} : {count}")
     
-    if not user_list:
-        text += "😴 Henüz kimse mesaj göndermedi."
-    else:
-        text += "\n".join(user_list)
-        text += f"\n\n📈 **Toplam:** {total_messages} mesaj, {total_users} kullanıcı"
-        if total_messages > 0 and total_users > 0:
-            avg_messages = total_messages // total_users
-            text += f"\n📊 **Ortalama:** {avg_messages} mesaj/kullanıcı"
-            if total_messages > 1000:
-                text += "\n🎉 **Harika!** Bu grup çok aktif!"
-            elif total_messages > 500:
-                text += "\n👍 **Güzel!** Grup aktif durumda!"
-            elif total_messages > 100:
-                text += "\n😊 **İdare eder!** Biraz daha aktiflik gerekir."
+    text += "\n".join(user_list)
+    
+    if requester_id and requester_name:
+        # If requester wasn't in top 20, fetch their count separately
+        if requester_count == 0:
+             user_stat = await collection.find_one({"chat_id": chat_id, "user_id": requester_id})
+             if user_stat:
+                 requester_count = int(user_stat.get("count", 0))
+        
+        text += f"\n\nSenin {requester_name} : {requester_count}"
+        
     return text
 
 
 @app.on_message(filters.command(["top", "skor"]) & filters.group & ~app.bl_users)
 @lang.language()
 async def top_users(_, message: types.Message):
-    cmd = message.command
-    if len(cmd) > 1:
-        # If user explicitly asks for /top weekly, show it directly?
-        # But the request is to show the menu. I'll stick to the menu unless they insist.
-        # Actually, for backward compatibility, if they type /top weekly, showing weekly stats directly is better UX.
-        # But if just /top, show menu.
-        arg = cmd[1].lower()
-        if arg in ["weekly", "haftalık"]:
-            text = await get_leaderboard_text(message.chat.id, "weekly")
-            await message.reply_text(text)
-            return
-        elif arg in ["monthly", "aylık"]:
-            text = await get_leaderboard_text(message.chat.id, "monthly")
-            await message.reply_text(text)
-            return
-
-    # Show menu
-    user_mention = message.from_user.mention if message.from_user else "Anonim"
-    text = "👥 Bulunduğunuz grup için sıralama türünü seçiniz.\n\n"
-    text += "🖼 Görsel sıralama için `/topbilgi` komutunu kullanınız. ❞\n\n"
-    text += f"Bu menü {user_mention} Tarafından açıldı."
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
     
+    # Default to Daily view
+    text = await get_leaderboard_text(message.chat.id, "daily", user_id, user_name)
+    
+    # Daily view buttons: [Back] [Weekly]
     markup = types.InlineKeyboardMarkup(
         [
             [
-                types.InlineKeyboardButton("📆 Günlük", callback_data="top_daily"),
-                types.InlineKeyboardButton("📆 Haftalık", callback_data="top_weekly"),
-                types.InlineKeyboardButton("📆 Aylık", callback_data="top_monthly"),
-            ],
-            [
-                types.InlineKeyboardButton("📊 Bütün zamanlarda", callback_data="top_alltime"),
-            ],
-            [
-                types.InlineKeyboardButton("📄 Detaylı bilgi", callback_data="score_help_cb"),
-                types.InlineKeyboardButton("🌐 Global Gruplar", callback_data="global_stats"),
-            ],
+                types.InlineKeyboardButton("🔙 Önceki menü", callback_data="top_close"),
+                types.InlineKeyboardButton("📅 Haftalık", callback_data="top_weekly"),
+            ]
         ]
     )
     await message.reply_text(text, reply_markup=markup)
@@ -197,122 +148,58 @@ async def top_users(_, message: types.Message):
 
 @app.on_callback_query(filters.regex(r"^top_") & ~app.bl_users)
 async def top_callback(_, query: types.CallbackQuery):
-    period_map = {
-        "top_daily": "daily",
-        "top_weekly": "weekly",
-        "top_monthly": "monthly",
-        "top_alltime": "alltime",
-    }
-    period = period_map.get(query.data)
-    if not period:
+    chat_id = query.message.chat.id
+    user_id = query.from_user.id
+    user_name = query.from_user.first_name
+    data = query.data
+    
+    if data == "top_close":
+        await query.message.delete()
         return
+
+    period = ""
+    markup = None
     
-    text = await get_leaderboard_text(query.message.chat.id, period)
-    
-    # Keep the buttons so user can switch tabs
-    markup = query.message.reply_markup
-    
-    try:
-        await query.edit_message_text(text, reply_markup=markup)
-    except Exception:
-        # Message not modified
-        pass
-
-
-@app.on_callback_query(filters.regex("score_help_cb") & ~app.bl_users)
-async def help_callback(_, query: types.CallbackQuery):
-    # Show help text, maybe with a back button to the menu?
-    # Or just edit text to help.
-    text = "**📊 Mesaj Skor Sistemi Yardım**\n\n"
-    text += "**Komutlar:**\n"
-    text += "├ `/top` - Günlük sıralama\n"
-    text += "├ `/top weekly` - Haftalık sıralama\n"
-    text += "├ `/top monthly` - Aylık sıralama\n"
-    text += "├ `/mystats` - Kişisel istatistiklerin\n"
-    text += "├ `/grupistatistik` - Grup istatistikleri\n"
-    text += "└ `/skoryardım` - Bu yardım mesajı\n\n"
-    text += "**Sıralama Rozetleri:**\n"
-    text += "🥇 **1.** - Altın madalya\n"
-    text += "🥈 **2.** - Gümüş madalya\n"
-    text += "🥉 **3.** - Bronz madalya\n"
-    text += "🏅 **4-5.** - Başarı rozeti\n"
-    text += "👤 **6+** - Katılım rozeti\n\n"
-    text += "**Aktivite Emojileri:**\n"
-    text += "🔥 1000+ mesaj - Aşırı aktif\n"
-    text += "⚡ 500+ mesaj - Çok aktif\n"
-    text += "✨ 100+ mesaj - Aktif\n"
-    text += "💫 50+ mesaj - Orta\n"
-    text += "⭐ 10+ mesaj - Az aktif\n"
-    text += "💤 10 mesaj - Düşük aktivite\n"
-
-    # Add back button
-    markup = types.InlineKeyboardMarkup(
-        [
-            [types.InlineKeyboardButton("🔙 Geri Dön", callback_data="top_back")]
-        ]
-    )
-    await query.edit_message_text(text, reply_markup=markup)
-
-
-@app.on_callback_query(filters.regex("top_back") & ~app.bl_users)
-async def back_callback(_, query: types.CallbackQuery):
-    # Restore main menu
-    user_mention = query.from_user.mention if query.from_user else "Anonim"
-    text = "👥 Bulunduğunuz grup için sıralama türünü seçiniz.\n\n"
-    text += "🖼 Görsel sıralama için `/topbilgi` komutunu kullanınız. ❞\n\n"
-    # Note: Using the callback user might differ from original opener, but it's acceptable.
-    # Ideally we preserve the original text, but recreating it is fine.
-    text += f"Bu menü {user_mention} Tarafından açıldı."
-    
-    markup = types.InlineKeyboardMarkup(
-        [
+    if data == "top_daily":
+        period = "daily"
+        markup = types.InlineKeyboardMarkup([
             [
-                types.InlineKeyboardButton("📆 Günlük", callback_data="top_daily"),
-                types.InlineKeyboardButton("📆 Haftalık", callback_data="top_weekly"),
-                types.InlineKeyboardButton("📆 Aylık", callback_data="top_monthly"),
-            ],
+                types.InlineKeyboardButton("� Önceki menü", callback_data="top_close"),
+                types.InlineKeyboardButton("� Haftalık", callback_data="top_weekly"),
+            ]
+        ])
+    elif data == "top_weekly":
+        period = "weekly"
+        markup = types.InlineKeyboardMarkup([
             [
-                types.InlineKeyboardButton("📊 Bütün zamanlarda", callback_data="top_alltime"),
-            ],
+                types.InlineKeyboardButton("� Önceki menü", callback_data="top_close"),
+                types.InlineKeyboardButton("� Aylık", callback_data="top_monthly"),
+            ]
+        ])
+    elif data == "top_monthly":
+        period = "monthly"
+        markup = types.InlineKeyboardMarkup([
             [
-                types.InlineKeyboardButton("📄 Detaylı bilgi", callback_data="score_help_cb"),
-                types.InlineKeyboardButton("🌐 Global Gruplar", callback_data="global_stats"),
-            ],
-        ]
-    )
-    await query.edit_message_text(text, reply_markup=markup)
+                types.InlineKeyboardButton("� Önceki menü", callback_data="top_close"),
+                types.InlineKeyboardButton("📊 Toplam", callback_data="top_alltime"),
+            ]
+        ])
+    elif data == "top_alltime":
+        period = "alltime"
+        markup = types.InlineKeyboardMarkup([
+            [
+                types.InlineKeyboardButton("🔙 Önceki menü", callback_data="top_close"),
+                types.InlineKeyboardButton("📅 Günlük", callback_data="top_daily"),
+            ]
+        ])
+        
+    if period:
+        text = await get_leaderboard_text(chat_id, period, user_id, user_name)
+        try:
+            await query.edit_message_text(text, reply_markup=markup)
+        except Exception:
+            pass
 
-
-@app.on_callback_query(filters.regex("global_stats") & ~app.bl_users)
-async def global_stats_callback(_, query: types.CallbackQuery):
-    await query.answer("🌐 Global istatistikler henüz aktif değil!", show_alert=True)
-
-
-async def get_user_rank(chat_id: int, period: str, user_id: int, key: str) -> int:
-    if period == "daily":
-        pipeline = [
-            {"$match": {"chat_id": chat_id, "date": key}},
-            {"$sort": {"count": -1}},
-            {"$group": {"_id": None, "users": {"$push": "$user_id"}}},
-        ]
-        result = await db.daily_messages.aggregate(pipeline).to_list(1)
-    elif period == "weekly":
-        pipeline = [
-            {"$match": {"chat_id": chat_id, "week": key}},
-            {"$sort": {"count": -1}},
-            {"$group": {"_id": None, "users": {"$push": "$user_id"}}},
-        ]
-        result = await db.weekly_messages.aggregate(pipeline).to_list(1)
-    else:
-        pipeline = [
-            {"$match": {"chat_id": chat_id, "month": key}},
-            {"$sort": {"count": -1}},
-            {"$group": {"_id": None, "users": {"$push": "$user_id"}}},
-        ]
-        result = await db.monthly_messages.aggregate(pipeline).to_list(1)
-    if result and user_id in result[0].get("users", []):
-        return result[0]["users"].index(user_id) + 1
-    return 0
 
 
 @app.on_message(filters.command(["mystats", "benimskor"]) & filters.group & ~app.bl_users)
@@ -535,5 +422,4 @@ async def scheduled_cleanup():
 
 
 tasks.append(asyncio.create_task(scheduled_cleanup()))
-
 
