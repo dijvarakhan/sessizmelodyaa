@@ -56,6 +56,8 @@
     "log_fetch": "Loglar alınıyor...",
     "log_not_found": "Log dosyası mevcut değil.",
     "log_sent": "{0} log dosyası",
+    "log_chat": "<u><b>Yeni Sohbet Logu</b></u>\n\n<b>Sohbet:</b> <code>{0}</code> | {1}\n<b>Kullanıcı:</b> <code>{2}</code> | {3}",
+    "log_user": "<u><b>Yeni Kullanıcı Logu</b></u>\n\n<b>ID:</b> <code>{0}</code>\n<b>Kullanıcı:</b> {1} | {2}",
     "logger_on": "Logger etkinleştirildi.",
     "logger_off": "Logger devre dışı bırakıldı.",
     "not_playing": "Bot şu anda görüntülü sohbette yayın yapmıyor.",
