@@ -18,7 +18,7 @@ class Config:
         self.BOT_TOKEN = getenv("BOT_TOKEN", "8284340154:AAH07G9K1e6Lb3LbmTYm9kZj51KlYqVwses")
         self.MONGO_URL = getenv("MONGO_URL", "mongodb+srv://mongoguess:guessmongo@cluster0.zcwklzz.mongodb.net/?retryWrites=true&w=majority") or getenv("MONGO_DB_URI")
         self.LOGGER_ID = int(getenv("LOGGER_ID", "-1003695016820"))
-        self.OWNER_ID = int(getenv("OWNER_ID", "6143754072"))
+        self.OWNER_ID = int(getenv("OWNER_ID", "8548853828"))
         self.OWNER_USERNAME = getenv("OWNER_USERNAME", "@Ekimekadar")
         self.BOT_USERNAME = getenv("BOT_USERNAME", "@AppleSongMusic_Bot")
         self.BOT_NAME = getenv("BOT_NAME", "Apple Musıc")
@@ -106,7 +106,7 @@ class Config:
 
         # Stream quality
         self.AUDIO_QUALITY = getenv("AUDIO_QUALITY", "HIGH")
-        self.VIDEO_QUALITY = getenv("VIDEO_QUALITY", "HD_720p")
+        self.VIDEO_QUALITY = getenv("VIDEO_QUALITY", "UHD_4K")
         self.STREAM_CACHE = int(getenv("STREAM_CACHE", 200))
         self.FFMPEG_PARAMS = getenv("FFMPEG_PARAMS", "")
         self.STREAM_FFMPEG = getenv(
@@ -168,3 +168,4 @@ class Config:
             missing.append("SESSION1")
         if missing:
             raise SystemExit(f"Missing required environment variables: {', '.join(missing)}")
+
