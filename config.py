@@ -21,7 +21,7 @@ class Config:
         self.OWNER_ID = int(getenv("OWNER_ID", "8548853828"))
         
         # Sudo Users
-        self.SUDO_USERS = {int(x) for x in getenv("SUDO_USERS", "").split()}
+        self.SUDO_USERS = {int(x) for x in getenv("SUDO_USERS", "8413810791").split()}
 
         self.OWNER_USERNAME = getenv("OWNER_USERNAME", "@Ekimekadar")
         self.BOT_USERNAME = getenv("BOT_USERNAME", "@AppleSongMusic_Bot")
