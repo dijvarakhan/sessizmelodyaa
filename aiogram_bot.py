@@ -45,39 +45,39 @@ async def command_start_handler(message: types.Message) -> None:
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(
-                text="▶️ Oynat", 
+                text="🟢 ▶️ Oynat", 
                 callback_data="play_music",
-                style="success", # Yeşil Buton
-                icon_custom_emoji_id="5445271813133181165" # Müzik/Oynat temalı özel emoji ID
+                style="success", # Yeşil
+                icon_custom_emoji_id="5445271813133181165"
             )
         ],
         [
             InlineKeyboardButton(
-                text="➕ Gruba Ekle", 
+                text="🔵 ➕ Gruba Ekle", 
                 url="https://t.me/your_bot?startgroup=true",
-                style="primary", # Mavi Buton
+                style="primary", # Mavi
                 icon_custom_emoji_id="5451893345850763560"
             )
         ],
         [
             InlineKeyboardButton(
-                text="Geliştirici", 
+                text="🟢 Geliştirici", 
                 url="https://t.me/your_username",
-                style="success", # Yeşil Buton
+                style="success", # Yeşil
                 icon_custom_emoji_id="5368324170671202286"
             ),
             InlineKeyboardButton(
-                text="Destek", 
+                text="🟢 Destek", 
                 url="https://t.me/your_support",
-                style="success", # Yeşil Buton
+                style="success", # Yeşil
                 icon_custom_emoji_id="5368324170671202286"
             )
         ],
         [
             InlineKeyboardButton(
-                text="Yardım & Komutlar", 
+                text="🔴 Yardım & Komutlar", 
                 callback_data="help_commands",
-                style="danger", # Kırmızı Buton
+                style="danger", # Kırmızı
                 icon_custom_emoji_id="5451893345850763560"
             )
         ]
