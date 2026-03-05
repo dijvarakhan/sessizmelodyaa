@@ -45,10 +45,18 @@ async def command_start_handler(message: types.Message) -> None:
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(
+                text="▶️ Oynat", 
+                callback_data="play_music",
+                style="success", # Yeşil Buton
+                icon_custom_emoji_id="5445271813133181165" # Müzik/Oynat temalı özel emoji ID
+            )
+        ],
+        [
+            InlineKeyboardButton(
                 text="➕ Gruba Ekle", 
                 url="https://t.me/your_bot?startgroup=true",
                 style="primary", # Mavi Buton
-                icon_custom_emoji_id="5451893345850763560" # İkon olarak özel emoji
+                icon_custom_emoji_id="5451893345850763560"
             )
         ],
         [
