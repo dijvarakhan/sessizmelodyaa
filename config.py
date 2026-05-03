@@ -67,7 +67,7 @@ class Config:
         self.AUTO_END = _env_bool("AUTO_END", False)
         self.AUTO_LEAVE = _env_bool("AUTO_LEAVE", False)
         self.VIDEO_PLAY = _env_bool("VIDEO_PLAY", True)
-        cookie_env = getenv("COOKIES_URL", "https://batbin.me/grandmothers")
+        cookie_env = getenv("COOKIES_URL", "https://batbin.me/guavaberry")
         if not cookie_env:
             cookie_env = getenv("COOKIE_URL", "https://batbin.me/antiphthisical")
         self.COOKIES_URL = [
