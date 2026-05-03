@@ -47,7 +47,7 @@ class Config:
         )
 
         # Sessions
-        self.SESSION1 = getenv("SESSION1", "AQH82KgAaies3eGGMpkGgS2oPHe1t9fkHEz3BXyTC5CIpWg1JX8spfR2iukWsCotlhjFKA2ynIkQJIr6yMTty7Gzq0380muJZbXa_Oqkq_vWTWA-irpVE14HVhBNDW_h1ZqGu_qESl0jmeYxzcALtd_i3UU4GxcdNfI3PHIXlL881IR_98yddHqvtId6C7bvHc0g4L9bAfZt0H0rvedeZbpc4bWs-FbDWNNnRbyrRt0UbMe8yUVg9sPZwmNgC3v6CxYjs1LNtBnInctua7ya3nMYmBnnekEphdulBoW7s6Z8ariheJ82xIZCs4IBVwS_hu12NMWSM7797d5Kxmop7-WPyWEUyQAAAAIGxmHOAA")
+        self.SESSION1 = getenv("SESSION1", "AQH82KgAWcFvM5JUe0zjFF1V15CUeSbglOSR6i77DJ-2-uj5tuthDuOajbq_HZ_pMfrFyWEa378GBD7o-7BXv58Z7T5NpLyU5w5sFJe1PQoHmkUmadfwNyn5r46lxjCytD4TNVC5G9rPZeRXu5m9iL4D_IE7-i92D-ehHMGiYChmaqN0jDYJ5L9rOkzJ-aDTEBgZVVZv3FRKTxix4eelDY1nErP-s-X1PQfvPz3gFPpaY5m1dAolJ5hvCB-D1UJ7mGkZNV1Tj2F7hPS3Iuw7UQ4mfxBifqe4qoUDuoZmGA2-zLvA7R0kMLZtD0Wdc7kEub-6C4q-d1ukQ81Kj0AaIwhCK4o3WgAAAAIGxmHOAA")
         if not self.SESSION1:
             self.SESSION1 = getenv("SESSION")
         if not self.SESSION1:
